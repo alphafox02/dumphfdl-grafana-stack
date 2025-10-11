@@ -89,10 +89,16 @@ dumphfdl --soapysdr driver=airspyhf --sample-rate 768000   --centerfreq 8891 883
 
 Once running:
 
--   Grafana → http://localhost:3000 (admin / admin)
--   Data sources auto-configured for Graphite and Loki
--   Import the example dashboard (`dashboard-hfdl.json`) to visualize
-    live HFDL metrics and logs
+-   Grafana → http://localhost:3000 (default login: admin / admin)
+-   Add new data sources manually:
+    -   **Graphite:**
+        -   Type: *Graphite*\
+        -   URL: `http://graphite:80`
+    -   **Loki:**
+        -   Type: *Loki*\
+        -   URL: `http://loki:3100`
+-   After adding both data sources, import the example dashboard
+    (`dashboard-hfdl.json`) to visualize live HFDL metrics and logs
 
 ------------------------------------------------------------------------
 
