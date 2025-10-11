@@ -1,0 +1,125 @@
+{
+  "title": "HFDL: Metrics + Logs",
+  "editable": true,
+  "timezone": "",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "tags": ["hfdl", "dumphfdl", "graphite", "loki"],
+  "templating": {
+    "list": [
+      {
+        "name": "DS_GRAPHITE",
+        "type": "datasource",
+        "label": "Graphite datasource",
+        "query": "graphite",
+        "hide": 0,
+        "refresh": 1
+      },
+      {
+        "name": "DS_LOKI",
+        "type": "datasource",
+        "label": "Loki datasource",
+        "query": "loki",
+        "hide": 0,
+        "refresh": 1
+      },
+      {
+        "name": "freq",
+        "type": "query",
+        "label": "Frequency (Loki label)",
+        "datasource": {"type": "loki", "uid": "$DS_LOKI"},
+        "query": {
+          "refId": "A",
+          "queryType": "label_values",
+          "expr": "{job=\"dumphfdl\"}",
+          "label": "freq"
+        },
+        "refresh": 2,
+        "hide": 0,
+        "includeAll": true,
+        "multi": true,
+        "options": []
+      },
+      {
+        "name": "dst_name",
+        "type": "query",
+        "label": "Ground Station (Loki label)",
+        "datasource": {"type": "loki", "uid": "$DS_LOKI"},
+        "query": {
+          "refId": "A",
+          "queryType": "label_values",
+          "expr": "{job=\"dumphfdl\"}",
+          "label": "dst_name"
+        },
+        "refresh": 2,
+        "hide": 0,
+        "includeAll": true,
+        "multi": true,
+        "options": []
+      }
+    ]
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Total frames/sec (all channels)",
+      "gridPos": { "h": 9, "w": 12, "x": 0, "y": 0 },
+      "datasource": { "type": "graphite", "uid": "$DS_GRAPHITE" },
+      "fieldConfig": {
+        "defaults": { "unit": "ops" },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "target": "scale(sumSeries(stats_counts.dumphfdl.channels.*.frames.good), 0.1)"
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" }
+      }
+    },
+    {
+      "type": "timeseries",
+      "title": "Top 5 channels by frames/sec (15m avg)",
+      "gridPos": { "h": 9, "w": 12, "x": 12, "y": 0 },
+      "datasource": { "type": "graphite", "uid": "$DS_GRAPHITE" },
+      "fieldConfig": {
+        "defaults": { "unit": "ops" },
+        "overrides": []
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "target": "highestAverage(movingAverage(scale(stats_counts.dumphfdl.channels.*.frames.good, 0.1), '15min'), 5)"
+        }
+      ],
+      "options": {
+        "legend": { "displayMode": "table", "placement": "bottom" }
+      }
+    },
+    {
+      "type": "logs",
+      "title": "HFDL logs (filter by freq & ground station)",
+      "gridPos": { "h": 12, "w": 24, "x": 0, "y": 9 },
+      "datasource": { "type": "loki", "uid": "$DS_LOKI" },
+      "options": {
+        "dedupStrategy": "none",
+        "showCommonLabels": false,
+        "wrapLogMessage": true
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "expr": "{job=\"dumphfdl\"}"
+        }
+      ],
+      "transformations": [],
+      "transparent": false
+    }
+  ],
+  "uid": null,
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": { "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"] }
+}
