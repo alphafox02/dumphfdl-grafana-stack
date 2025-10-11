@@ -119,12 +119,12 @@ Once running:
 - Run `docker logs graphite` to verify StatsD metrics
 
 **No logs in Grafana (Loki):**\
-- Ensure Promtail is tailing `/tmp/hfdl.jsonl` (check
+- Ensure Promtail is tailing `/tmp/hfdl_*.jsonl` (check
 `docker logs promtail`)\
 - Confirm that file exists and has readable JSON lines
 
 **Permission issues:**\
-- `/tmp/hfdl.jsonl` must be world-readable, or mounted into `/logs`
+- `/tmp/hfdl_*.jsonl` must be world-readable, or mounted into `/logs`
 inside the Promtail container
 
 **Disk usage:**\
