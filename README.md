@@ -76,7 +76,7 @@ docker run hello-world
 Clone and start the stack:
 
 ``` bash
-git clone https://github.com/yourusername/dumphfdl-grafana-stack.git
+git clone https://github.com/alphafox02/dumphfdl-grafana-stack.git
 cd dumphfdl-grafana-stack
 docker compose up -d
 ```
