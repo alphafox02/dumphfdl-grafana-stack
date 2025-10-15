@@ -14,10 +14,8 @@ scrape_configs:
       - targets: [localhost]
         labels:
           job: dumphfdl
-          __path__: /logs/hfdl_*.jsonl   # mapped from /tmp/hfdl.jsonl in docker-compose
-
+          __path__: /logs/hfdl_*.jsonl   # map your /tmp/hfdl.jsonl -> /logs/ in docker
     pipeline_stages:
-      # 1) parse your JSON (everything under "hfdl")
       - json:
           expressions:
             app: hfdl.app.name
@@ -31,8 +29,6 @@ scrape_configs:
             noise_db: hfdl.noise_level
             skew_hz: hfdl.freq_skew
             slot: hfdl.slot
-
-            # LPDU basics
             lpdu_type_id: hfdl.lpdu.type.id
             lpdu_type: hfdl.lpdu.type.name
             src_type: hfdl.lpdu.src.type
@@ -41,29 +37,19 @@ scrape_configs:
             dst_id: hfdl.lpdu.dst.id
             dst_name: hfdl.lpdu.dst.name
             icao: hfdl.lpdu.ac_info.icao
-
-            # HFNPDU / ACARS bits (present in many messages)
             hfnpdu_type_id: hfdl.lpdu.hfnpdu.type.id
             hfnpdu_type: hfdl.lpdu.hfnpdu.type.name
             flight_id: hfdl.lpdu.hfnpdu.flight_id
-
-            # position if present
             pos_lat: hfdl.lpdu.hfnpdu.pos.lat
             pos_lon: hfdl.lpdu.hfnpdu.pos.lon
-
-            # ACARS envelope (when present)
             acars_label: hfdl.lpdu.hfnpdu.acars.label
             acars_flight: hfdl.lpdu.hfnpdu.acars.flight
             acars_reg: hfdl.lpdu.hfnpdu.acars.reg
             acars_msg: hfdl.lpdu.hfnpdu.acars.msg_text
-
-      # 2) normalize dst_name for use as a label (spaces/commas -> underscores)
       - replace:
           source: dst_name
           expression: '[^A-Za-z0-9_.-]'
           replace: '_'
-
-      # 3) promote selected fields to Loki labels (fast filters in Explore)
       - labels:
           station:
           freq:
@@ -71,13 +57,67 @@ scrape_configs:
           slot:
           lpdu_type:
           dst_type:
-          dst_name:     # e.g., Albrook,_Panama
+          dst_name:
           icao:
           flight_id:
           acars_label:
           acars_flight:
+      - timestamp:
+          source: tsecs
+          format: Unix
 
-      # 4) use device time (seconds) rather than ingestion time
+  - job_name: dumpvdl2
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: dumpvdl2
+          __path__: /logs/vdl2_*.jsonl   # map your dumpvdl2 JSONL file(s) here
+    pipeline_stages:
+      # Parse top-level vdl2 envelope (metadata + whatever libacars added)
+      - json:
+          expressions:
+            app: vdl2.app.name
+            ver: vdl2.app.ver
+            station: vdl2.station
+            tsecs: vdl2.t.sec
+            tusec: vdl2.t.usec
+            freq: vdl2.freq
+            burst_len: vdl2.burst_len_octets
+            hdr_bits_fixed: vdl2.hdr_bits_fixed
+            fec_octets: vdl2.octets_corrected_by_fec
+            idx: vdl2.idx
+            sig_db: vdl2.sig_level
+            noise_db: vdl2.noise_level
+            skew_ppm: vdl2.freq_skew
+
+            # AVL/C / ACARS (present only when decoded; null otherwise)
+            # libacars commonly exposes these keys; adjust if your build differs.
+            avlc_sap: vdl2.avlc.sap
+            avlc_proto: vdl2.avlc.proto
+            acars_label: vdl2.acars.label
+            acars_block_id: vdl2.acars.block_id
+            acars_mode: vdl2.acars.mode
+            acars_reg: vdl2.acars.reg
+            acars_flight: vdl2.acars.flight
+            acars_txt: vdl2.acars.msg_text
+      # Optional: normalize flight/reg for label use
+      - replace:
+          source: acars_flight
+          expression: '[^A-Za-z0-9_.-]'
+          replace: '_'
+      - replace:
+          source: acars_reg
+          expression: '[^A-Za-z0-9_.-]'
+          replace: '_'
+      # Promote a few as labels (nulls are ignored)
+      - labels:
+          station:
+          freq:
+          avlc_proto:
+          acars_label:
+          acars_flight:
+          acars_reg:
+      # Use device seconds; (microseconds exist but Promtail can’t combine sec+usec directly)
       - timestamp:
           source: tsecs
           format: Unix
