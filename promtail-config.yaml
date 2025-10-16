@@ -59,7 +59,7 @@ scrape_configs:
 
       # Small helper: flag rows that actually have coordinates (string-safe)
       - template:
-          source: ""
+          source: "message"
           template: '{{ if and .pos_lat .pos_lon }}1{{ else }}0{{ end }}'
           dest: has_pos
 
@@ -143,17 +143,17 @@ scrape_configs:
 
       # Coalesce ACARS / raw position into unified fields the map can rely on
       - template:
-          source: ""
+          source: "message"
           template: '{{ if .pos_lat_acars }}{{ .pos_lat_acars }}{{ else }}{{ .pos_lat_raw }}{{ end }}'
           dest: pos_lat
       - template:
-          source: ""
+          source: "message"
           template: '{{ if .pos_lon_acars }}{{ .pos_lon_acars }}{{ else }}{{ .pos_lon_raw }}{{ end }}'
           dest: pos_lon
 
       # Flag rows with coordinates
       - template:
-          source: ""
+          source: "message"
           template: '{{ if and .pos_lat .pos_lon }}1{{ else }}0{{ end }}'
           dest: has_pos
 
