@@ -3,7 +3,7 @@
   "editable": true,
   "timezone": "",
   "schemaVersion": 39,
-  "version": 7,
+  "version": 8,
   "refresh": "10s",
   "tags": ["hfdl","dumphfdl","vdl2","dumpvdl2","graphite","loki"],
   "templating": {
