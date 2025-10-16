@@ -135,7 +135,7 @@ scrape_configs:
             noise_db: vdl2.noise_level
             skew_ppm: vdl2.freq_skew
 
-            # AVLC envelope
+            # AVLC envelope (common metadata you might want later)
             avlc_cr: vdl2.avlc.cr
             avlc_frame_type: vdl2.avlc.frame_type
             avlc_cmd: vdl2.avlc.cmd
@@ -144,7 +144,7 @@ scrape_configs:
             avlc_dst_addr: vdl2.avlc.dst.addr
             avlc_dst_type: vdl2.avlc.dst.type
 
-            # ACARS under AVLC
+            # ACARS under AVLC (your sample shows it here)
             acars_label: vdl2.avlc.acars.label
             acars_block_id: vdl2.avlc.acars.blk_id
             acars_mode: vdl2.avlc.acars.mode
@@ -152,7 +152,7 @@ scrape_configs:
             acars_flight: vdl2.avlc.acars.flight
             acars_txt: vdl2.avlc.acars.msg_text
 
-            # Fallbacks if build emits top-level acars
+            # Fallbacks if a build emits top-level acars (keep them too)
             acars_label2: vdl2.acars.label
             acars_block_id2: vdl2.acars.block_id
             acars_mode2: vdl2.acars.mode
@@ -208,7 +208,7 @@ scrape_configs:
           template: '{{ if and .pos_lat .pos_lon }}1{{ else }}0{{ end }}'
           dest: has_pos
 
-      # Normalize label-safe strings (flight/reg can have odd chars)
+      # Normalize label-safe strings (flight/reg can have odd chars like ".N5179A")
       - replace:
           source: acars_flight_u
           expression: '[^A-Za-z0-9_.-]'
@@ -218,7 +218,7 @@ scrape_configs:
           expression: '[^A-Za-z0-9_.-]'
           replace: '_'
 
-      # Promote labels (**fix: values:**)
+      # Promote labels (avoid high-cardinality) **with values:**
       - labels:
           values:
             station: station
