@@ -202,7 +202,7 @@ scrape_configs:
           dest: pos_lon
 
       # Extract lat/lon from ACARS msg_text like "/+34.271/-83.172/..."
-      - regexp:
+      - regex:
           source: acars_txt_u
           expression: '(?P<pos_lat>[+-][0-9]{2,3}\.[0-9]{3})\/(?P<pos_lon>[+-][0-9]{2,3}\.[0-9]{3})'
 
