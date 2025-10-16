@@ -65,9 +65,9 @@ scrape_configs:
           template: '{{ if and .pos_lat .pos_lon }}1{{ else }}0{{ end }}'
           dest: has_pos
 
-      # Trim flight_id for nicer labels/tooltips
+      # Trim flight_id for nicer labels/tooltips -> create 'flight' field
       - template:
-          source: flight_trim
+          source: flight
           template: '{{ trim .flight_id }}'
 
       # Normalize label-safe strings
@@ -84,24 +84,23 @@ scrape_configs:
           expression: '[^A-Za-z0-9_.-]'
           replace: '_'
 
-      # Labels to promote  **(fix: must use values:)**
+      # Labels to promote (simple list form)
       - labels:
-          values:
-            station: station
-            freq: freq
-            bit_rate: bit_rate
-            slot: slot
-            lpdu_type: lpdu_type
-            dst_type: dst_type
-            dst_name: dst_name
-            icao: icao
-            flight_id: flight_id
-            flight: flight_trim
-            acars_label: acars_label
-            acars_flight: acars_flight
-            hfnpdu_type: hfnpdu_type
-            has_pos: has_pos
-            sig_db: sig_db
+          station:
+          freq:
+          bit_rate:
+          slot:
+          lpdu_type:
+          dst_type:
+          dst_name:
+          icao:
+          flight_id:
+          flight:
+          acars_label:
+          acars_flight:
+          hfnpdu_type:
+          has_pos:
+          sig_db:
 
       - timestamp:
           source: tsecs
@@ -192,6 +191,17 @@ scrape_configs:
           template: '{{ if .acars_txt }}{{ .acars_txt }}{{ else }}{{ .acars_txt2 }}{{ end }}'
           dest: acars_txt_u
 
+      # Create canonical names for labels expected in Grafana
+      - template:
+          source: acars_label
+          template: '{{ .acars_label_u }}'
+      - template:
+          source: acars_flight
+          template: '{{ .acars_flight_u }}'
+      - template:
+          source: acars_reg
+          template: '{{ .acars_reg_u }}'
+
       # Unified position fields for the map
       - template:
           source: "message"
@@ -210,25 +220,24 @@ scrape_configs:
 
       # Normalize label-safe strings (flight/reg can have odd chars like ".N5179A")
       - replace:
-          source: acars_flight_u
+          source: acars_flight
           expression: '[^A-Za-z0-9_.-]'
           replace: '_'
       - replace:
-          source: acars_reg_u
+          source: acars_reg
           expression: '[^A-Za-z0-9_.-]'
           replace: '_'
 
-      # Promote labels (avoid high-cardinality) **with values:**
+      # Promote labels (simple list form)
       - labels:
-          values:
-            station: station
-            freq: freq
-            avlc_frame_type: avlc_frame_type
-            acars_label: acars_label_u
-            acars_flight: acars_flight_u
-            acars_reg: acars_reg_u
-            has_pos: has_pos
-            sig_db: sig_db
+          station:
+          freq:
+          avlc_frame_type:
+          acars_label:
+          acars_flight:
+          acars_reg:
+          has_pos:
+          sig_db:
 
       - timestamp:
           source: tsecs
