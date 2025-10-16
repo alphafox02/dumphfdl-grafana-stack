@@ -59,11 +59,16 @@ scrape_configs:
             acars_reg: hfdl.lpdu.hfnpdu.acars.reg
             acars_msg: hfdl.lpdu.hfnpdu.acars.msg_text
 
-      # has_pos helper
+      # has_pos helper -> set a simple flag we can filter on
       - template:
           source: "message"
           template: '{{ if and .pos_lat .pos_lon }}1{{ else }}0{{ end }}'
           dest: has_pos
+
+      # Trim flight_id for nicer labels/tooltips
+      - template:
+          source: flight_trim
+          template: '{{ trim .flight_id }}'
 
       # Normalize label-safe strings
       - replace:
@@ -79,21 +84,24 @@ scrape_configs:
           expression: '[^A-Za-z0-9_.-]'
           replace: '_'
 
-      # Labels to promote
+      # Labels to promote  **(fix: must use values:)**
       - labels:
-          station:
-          freq:
-          bit_rate:
-          slot:
-          lpdu_type:
-          dst_type:
-          dst_name:
-          icao:
-          flight_id:
-          acars_label:
-          acars_flight:
-          hfnpdu_type:
-          has_pos:
+          values:
+            station: station
+            freq: freq
+            bit_rate: bit_rate
+            slot: slot
+            lpdu_type: lpdu_type
+            dst_type: dst_type
+            dst_name: dst_name
+            icao: icao
+            flight_id: flight_id
+            flight: flight_trim
+            acars_label: acars_label
+            acars_flight: acars_flight
+            hfnpdu_type: hfnpdu_type
+            has_pos: has_pos
+            sig_db: sig_db
 
       - timestamp:
           source: tsecs
@@ -127,7 +135,7 @@ scrape_configs:
             noise_db: vdl2.noise_level
             skew_ppm: vdl2.freq_skew
 
-            # AVLC envelope (common metadata you might want later)
+            # AVLC envelope
             avlc_cr: vdl2.avlc.cr
             avlc_frame_type: vdl2.avlc.frame_type
             avlc_cmd: vdl2.avlc.cmd
@@ -136,7 +144,7 @@ scrape_configs:
             avlc_dst_addr: vdl2.avlc.dst.addr
             avlc_dst_type: vdl2.avlc.dst.type
 
-            # ACARS under AVLC (your sample shows it here)
+            # ACARS under AVLC
             acars_label: vdl2.avlc.acars.label
             acars_block_id: vdl2.avlc.acars.blk_id
             acars_mode: vdl2.avlc.acars.mode
@@ -144,7 +152,7 @@ scrape_configs:
             acars_flight: vdl2.avlc.acars.flight
             acars_txt: vdl2.avlc.acars.msg_text
 
-            # Fallbacks if a build emits top-level acars (keep them too)
+            # Fallbacks if build emits top-level acars
             acars_label2: vdl2.acars.label
             acars_block_id2: vdl2.acars.block_id
             acars_mode2: vdl2.acars.mode
@@ -200,7 +208,7 @@ scrape_configs:
           template: '{{ if and .pos_lat .pos_lon }}1{{ else }}0{{ end }}'
           dest: has_pos
 
-      # Normalize label-safe strings (flight/reg can have odd chars like ".N5179A")
+      # Normalize label-safe strings (flight/reg can have odd chars)
       - replace:
           source: acars_flight_u
           expression: '[^A-Za-z0-9_.-]'
@@ -210,15 +218,17 @@ scrape_configs:
           expression: '[^A-Za-z0-9_.-]'
           replace: '_'
 
-      # Promote labels (avoid high-cardinality)
+      # Promote labels (**fix: values:**)
       - labels:
-          station:
-          freq:
-          avlc_frame_type:
-          acars_label: acars_label_u
-          acars_flight: acars_flight_u
-          acars_reg: acars_reg_u
-          has_pos:
+          values:
+            station: station
+            freq: freq
+            avlc_frame_type: avlc_frame_type
+            acars_label: acars_label_u
+            acars_flight: acars_flight_u
+            acars_reg: acars_reg_u
+            has_pos: has_pos
+            sig_db: sig_db
 
       - timestamp:
           source: tsecs
