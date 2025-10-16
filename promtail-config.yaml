@@ -15,7 +15,9 @@ scrape_configs:
         labels:
           job: dumphfdl
           __path__: /logs/hfdl_*.jsonl   # map your /tmp/hfdl.jsonl -> /logs/ in docker
+
     pipeline_stages:
+      # Parse the JSON body and lift fields we care about
       - json:
           expressions:
             app: hfdl.app.name
@@ -29,6 +31,8 @@ scrape_configs:
             noise_db: hfdl.noise_level
             skew_hz: hfdl.freq_skew
             slot: hfdl.slot
+
+            # LPDU basics
             lpdu_type_id: hfdl.lpdu.type.id
             lpdu_type: hfdl.lpdu.type.name
             src_type: hfdl.lpdu.src.type
@@ -37,19 +41,45 @@ scrape_configs:
             dst_id: hfdl.lpdu.dst.id
             dst_name: hfdl.lpdu.dst.name
             icao: hfdl.lpdu.ac_info.icao
+
+            # HFNPDU / ACARS
             hfnpdu_type_id: hfdl.lpdu.hfnpdu.type.id
             hfnpdu_type: hfdl.lpdu.hfnpdu.type.name
             flight_id: hfdl.lpdu.hfnpdu.flight_id
+
+            # Position (when present)
             pos_lat: hfdl.lpdu.hfnpdu.pos.lat
             pos_lon: hfdl.lpdu.hfnpdu.pos.lon
+
+            # ACARS envelope (when present)
             acars_label: hfdl.lpdu.hfnpdu.acars.label
             acars_flight: hfdl.lpdu.hfnpdu.acars.flight
             acars_reg: hfdl.lpdu.hfnpdu.acars.reg
             acars_msg: hfdl.lpdu.hfnpdu.acars.msg_text
+
+      # Small helper: flag rows that actually have coordinates (string-safe)
+      - template:
+          source: ""
+          template: '{{ if and .pos_lat .pos_lon }}1{{ else }}0{{ end }}'
+          dest: has_pos
+
+      # Make `dst_name` safe as a label (no spaces/commas)
       - replace:
           source: dst_name
           expression: '[^A-Za-z0-9_.-]'
           replace: '_'
+
+      # Normalize flight/reg labels (avoid funky chars)
+      - replace:
+          source: acars_flight
+          expression: '[^A-Za-z0-9_.-]'
+          replace: '_'
+      - replace:
+          source: acars_reg
+          expression: '[^A-Za-z0-9_.-]'
+          replace: '_'
+
+      # Promote selected fields to labels (fast Loki filters; nulls are ignored)
       - labels:
           station:
           freq:
@@ -62,6 +92,10 @@ scrape_configs:
           flight_id:
           acars_label:
           acars_flight:
+          hfnpdu_type:   # e.g., "Performance data HFNPDU", "Frequency data HFNPDU", "ADS-C Basic report"
+          has_pos:
+
+      # Use device time from JSON (seconds)
       - timestamp:
           source: tsecs
           format: Unix
@@ -72,8 +106,9 @@ scrape_configs:
         labels:
           job: dumpvdl2
           __path__: /logs/vdl2_*.jsonl   # map your dumpvdl2 JSONL file(s) here
+
     pipeline_stages:
-      # Parse top-level vdl2 envelope (metadata + whatever libacars added)
+      # Parse top-level vdl2 envelope (metadata + decoded payload blocks from libacars)
       - json:
           expressions:
             app: vdl2.app.name
@@ -90,8 +125,7 @@ scrape_configs:
             noise_db: vdl2.noise_level
             skew_ppm: vdl2.freq_skew
 
-            # AVL/C / ACARS (present only when decoded; null otherwise)
-            # libacars commonly exposes these keys; adjust if your build differs.
+            # AVLC / ACARS (present only when decoded; null otherwise)
             avlc_sap: vdl2.avlc.sap
             avlc_proto: vdl2.avlc.proto
             acars_label: vdl2.acars.label
@@ -100,7 +134,30 @@ scrape_configs:
             acars_reg: vdl2.acars.reg
             acars_flight: vdl2.acars.flight
             acars_txt: vdl2.acars.msg_text
-      # Optional: normalize flight/reg for label use
+
+            # Position (schema can vary by message type/build)
+            pos_lat_acars: vdl2.acars.pos.lat
+            pos_lon_acars: vdl2.acars.pos.lon
+            pos_lat_raw: vdl2.pos.lat
+            pos_lon_raw: vdl2.pos.lon
+
+      # Coalesce ACARS / raw position into unified fields the map can rely on
+      - template:
+          source: ""
+          template: '{{ if .pos_lat_acars }}{{ .pos_lat_acars }}{{ else }}{{ .pos_lat_raw }}{{ end }}'
+          dest: pos_lat
+      - template:
+          source: ""
+          template: '{{ if .pos_lon_acars }}{{ .pos_lon_acars }}{{ else }}{{ .pos_lon_raw }}{{ end }}'
+          dest: pos_lon
+
+      # Flag rows with coordinates
+      - template:
+          source: ""
+          template: '{{ if and .pos_lat .pos_lon }}1{{ else }}0{{ end }}'
+          dest: has_pos
+
+      # Normalize flight/reg for label safety
       - replace:
           source: acars_flight
           expression: '[^A-Za-z0-9_.-]'
@@ -109,7 +166,8 @@ scrape_configs:
           source: acars_reg
           expression: '[^A-Za-z0-9_.-]'
           replace: '_'
-      # Promote a few as labels (nulls are ignored)
+
+      # Promote a few as labels (avoid high cardinality)
       - labels:
           station:
           freq:
@@ -117,7 +175,9 @@ scrape_configs:
           acars_label:
           acars_flight:
           acars_reg:
-      # Use device seconds; (microseconds exist but Promtail can’t combine sec+usec directly)
+          has_pos:
+
+      # Use device time from JSON (seconds)
       - timestamp:
           source: tsecs
           format: Unix
