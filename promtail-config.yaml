@@ -159,7 +159,7 @@ scrape_configs:
             acars_flight2: vdl2.acars.flight
             acars_txt2: vdl2.acars.msg_text
 
-            # Position possibilities
+            # Position possibilities (structured)
             pos_lat_acars: vdl2.avlc.acars.pos.lat
             pos_lon_acars: vdl2.avlc.acars.pos.lon
             pos_lat_raw: vdl2.pos.lat
@@ -191,18 +191,7 @@ scrape_configs:
           template: '{{ if .acars_txt }}{{ .acars_txt }}{{ else }}{{ .acars_txt2 }}{{ end }}'
           dest: acars_txt_u
 
-      # Create canonical names for labels expected in Grafana
-      - template:
-          source: acars_label
-          template: '{{ .acars_label_u }}'
-      - template:
-          source: acars_flight
-          template: '{{ .acars_flight_u }}'
-      - template:
-          source: acars_reg
-          template: '{{ .acars_reg_u }}'
-
-      # Unified position fields for the map
+      # Unified position fields for the map (structured JSON first)
       - template:
           source: "message"
           template: '{{ if .pos_lat_acars }}{{ .pos_lat_acars }}{{ else }}{{ .pos_lat_raw }}{{ end }}'
@@ -212,7 +201,12 @@ scrape_configs:
           template: '{{ if .pos_lon_acars }}{{ .pos_lon_acars }}{{ else }}{{ .pos_lon_raw }}{{ end }}'
           dest: pos_lon
 
-      # Flag rows with coordinates
+      # Extract lat/lon from ACARS msg_text like "/+34.271/-83.172/..."
+      - regexp:
+          source: acars_txt_u
+          expression: '(?P<pos_lat>[+-][0-9]{2,3}\.[0-9]{3})\/(?P<pos_lon>[+-][0-9]{2,3}\.[0-9]{3})'
+
+      # Flag rows with coordinates (recompute after regex)
       - template:
           source: "message"
           template: '{{ if and .pos_lat .pos_lon }}1{{ else }}0{{ end }}'
@@ -220,11 +214,11 @@ scrape_configs:
 
       # Normalize label-safe strings (flight/reg can have odd chars like ".N5179A")
       - replace:
-          source: acars_flight
+          source: acars_flight_u
           expression: '[^A-Za-z0-9_.-]'
           replace: '_'
       - replace:
-          source: acars_reg
+          source: acars_reg_u
           expression: '[^A-Za-z0-9_.-]'
           replace: '_'
 
@@ -233,9 +227,9 @@ scrape_configs:
           station:
           freq:
           avlc_frame_type:
-          acars_label:
-          acars_flight:
-          acars_reg:
+          acars_label: acars_label_u
+          acars_flight: acars_flight_u
+          acars_reg: acars_reg_u
           has_pos:
           sig_db:
 
