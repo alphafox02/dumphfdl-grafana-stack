@@ -1,523 +1,638 @@
 {
-  "title": "HFDL + VDL2: Metrics + Logs + Map",
+  "annotations": {
+    "list": [
+      {
+        "builtIn": 1,
+        "datasource": {
+          "type": "grafana",
+          "uid": "-- Grafana --"
+        },
+        "enable": true,
+        "hide": true,
+        "iconColor": "rgba(0, 211, 255, 1)",
+        "name": "Annotations & Alerts",
+        "type": "dashboard"
+      }
+    ]
+  },
   "editable": true,
-  "timezone": "",
-  "schemaVersion": 39,
-  "version": 10,
-  "refresh": "10s",
-  "tags": [
-    "hfdl",
-    "dumphfdl",
-    "vdl2",
-    "dumpvdl2",
-    "graphite",
-    "loki"
+  "fiscalYearStartMonth": 0,
+  "graphTooltip": 0,
+  "id": 0,
+  "links": [],
+  "panels": [
+    {
+      "datasource": {
+        "type": "graphite",
+        "uid": "$DS_GRAPHITE"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "red", "value": 80 }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 12, "x": 0, "y": 0 },
+      "id": 1,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        { "refId": "A", "target": "sumSeries(scale(stats_counts.dumphfdl*.channels.*.frames.good,0.1))" }
+      ],
+      "title": "HFDL msg/s",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "graphite",
+        "uid": "$DS_GRAPHITE"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "decimals": 1,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "red", "value": 80 }
+            ]
+          },
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 4, "w": 12, "x": 12, "y": 0 },
+      "id": 2,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "percentChangeColorMode": "standard",
+        "reduceOptions": { "calcs": ["lastNotNull"], "fields": "", "values": false },
+        "showPercentChange": false,
+        "textMode": "auto",
+        "wideLayout": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        { "refId": "A", "target": "sumSeries(scale(stats_counts.dumpvdl2*.*.decoder.msg.good,0.1))" }
+      ],
+      "title": "VDL2 msg/s",
+      "type": "stat"
+    },
+    {
+      "datasource": { "type": "graphite", "uid": "$DS_GRAPHITE" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+      "id": 3,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        { "refId": "A", "target": "alias(sumSeries(scale(stats_counts.dumphfdl*.channels.*.frames.good,0.1)),'HFDL total')" }
+      ],
+      "title": "HFDL: Total frames/sec (all channels)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "graphite", "uid": "$DS_GRAPHITE" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+      "id": 4,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "table", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        { "refId": "A", "target": "alias(sumSeries(scale(stats_counts.dumpvdl2*.*.decoder.msg.good,0.1)),'VDL2 total')" }
+      ],
+      "title": "VDL2: Total messages/sec (all freqs)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "graphite", "uid": "$DS_GRAPHITE" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+      "id": 5,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        { "refId": "A", "target": "highestAverage(movingAverage(scale(stats_counts.dumphfdl*.channels.*.frames.good,0.1),'15min'),5)" }
+      ],
+      "title": "HFDL: Top 5 channels (15m avg)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "graphite", "uid": "$DS_GRAPHITE" },
+      "fieldConfig": {
+        "defaults": {
+          "color": { "mode": "palette-classic" },
+          "custom": {
+            "axisBorderShow": false,
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "barWidthFactor": 0.6,
+            "drawStyle": "line",
+            "fillOpacity": 0,
+            "gradientMode": "none",
+            "hideFrom": { "legend": false, "tooltip": false, "viz": false },
+            "insertNulls": false,
+            "lineInterpolation": "linear",
+            "lineWidth": 1,
+            "pointSize": 5,
+            "scaleDistribution": { "type": "linear" },
+            "showPoints": "auto",
+            "showValues": false,
+            "spanNulls": false,
+            "stacking": { "group": "A", "mode": "none" },
+            "thresholdsStyle": { "mode": "off" }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              { "color": "green", "value": 0 },
+              { "color": "red", "value": 80 }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+      "id": 6,
+      "options": {
+        "legend": { "calcs": [], "displayMode": "list", "placement": "bottom", "showLegend": true },
+        "tooltip": { "hideZeros": false, "mode": "single", "sort": "none" }
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        { "refId": "A", "target": "highestAverage(movingAverage(scale(stats_counts.dumpvdl2*.*.decoder.msg.good,0.1),'15min'),5)" }
+      ],
+      "title": "VDL2: Top 5 freqs (15m avg)",
+      "type": "timeseries"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "$DS_LOKI" },
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 12, "w": 12, "x": 0, "y": 20 },
+      "id": 7,
+      "options": {
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": false,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": false,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        { "expr": "{job=\"dumphfdl\",freq=~\"${freq:regex}\",dst_name=~\"${dst_name:regex}\"}", "refId": "A" }
+      ],
+      "title": "HFDL logs (filter by freq & ground station)",
+      "type": "logs"
+    },
+    {
+      "datasource": { "type": "loki", "uid": "$DS_LOKI" },
+      "fieldConfig": { "defaults": {}, "overrides": [] },
+      "gridPos": { "h": 12, "w": 12, "x": 12, "y": 20 },
+      "id": 8,
+      "options": {
+        "dedupStrategy": "none",
+        "enableInfiniteScrolling": false,
+        "enableLogDetails": true,
+        "prettifyLogMessage": false,
+        "showCommonLabels": false,
+        "showLabels": false,
+        "showTime": false,
+        "sortOrder": "Descending",
+        "wrapLogMessage": true
+      },
+      "pluginVersion": "12.2.0",
+      "targets": [
+        { "expr": "{job=\"dumpvdl2\",freq=~\"${vdl2_freq:regex}\"}", "refId": "A" }
+      ],
+      "title": "VDL2 logs (filter by freq; ACARS flight optional)",
+      "type": "logs"
+    },
+    {
+      "collapsed": true,
+      "gridPos": { "h": 1, "w": 24, "x": 0, "y": 32 },
+      "id": 9,
+      "panels": [
+        {
+          "datasource": { "type": "loki", "uid": "$DS_LOKI" },
+          "fieldConfig": {
+            "defaults": {
+              "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": 0 },
+                  { "color": "red", "value": 80 }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 12, "w": 24, "x": 0, "y": 33 },
+          "id": 10,
+          "options": {
+            "basemap": { "type": "default" },
+            "controls": {
+              "mouseWheelZoom": true,
+              "showAttribution": true,
+              "showDebug": false,
+              "showMeasure": false,
+              "showScale": false,
+              "showZoom": true
+            },
+            "layers": [
+              {
+                "config": {
+                  "data": { "refId": "A" },
+                  "location": { "latField": "latitude", "lonField": "longitude", "mode": "coords" },
+                  "opacity": 0.9,
+                  "showLegend": true,
+                  "size": 6,
+                  "tooltip": {
+                    "fields": ["flight", "reg", "freq", "sig_db", "acars_label", "avlc_frame_type"],
+                    "mode": "details"
+                  },
+                  "color": { "mode": "fixed", "fixed": "#00A3FF" },
+                  "style": { "opacity": 1 }
+                },
+                "name": "VDL2 positions (ACARS when present) markers",
+                "style": { "color": { "fixed": "#00A3FF" }, "size": { "fixed": 6 } },
+                "type": "markers"
+              }
+            ],
+            "tooltip": { "mode": "details" },
+            "view": {
+              "allLayers": true,
+              "data": { "mode": "all-layers" },
+              "id": "fit",
+              "lat": 0,
+              "lon": 0,
+              "maxZoom": 6,
+              "noRepeat": false,
+              "padding": 0.1,
+              "zoom": 1
+            }
+          },
+          "pluginVersion": "12.2.0",
+          "targets": [
+            {
+              "expr": "{job=\"dumpvdl2\", freq=~\"${vdl2_freq:regex}\"} | json | regexp \"/(?P<lat>[+-]?[0-9]{1,3}([.][0-9]{3,6})?)/(?P<lon>[+-]?[0-9]{1,3}([.][0-9]{3,6})?)/\" | label_format lat=\"{{ or .vdl2_avlc_acars_pos_lat .vdl2_pos_lat .lat }}\", lon=\"{{ or .vdl2_avlc_acars_pos_lon .vdl2_pos_lon .lon }}\", flight=\"{{ or .vdl2_avlc_acars_flight .vdl2_acars_flight }}\", reg=\"{{ or .vdl2_avlc_acars_reg .vdl2_acars_reg }}\"",
+              "refId": "A"
+            }
+          ],
+          "title": "VDL2 positions (ACARS when present)",
+          "transformations": [
+            { "id": "labelsToFields", "options": { "mode": "columns" } },
+            { "id": "renameByRegex", "options": { "regex": "^lat$", "renamePattern": "latitude" } },
+            { "id": "renameByRegex", "options": { "regex": "^lon$", "renamePattern": "longitude" } },
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  { "destinationType": "number", "targetField": "latitude" },
+                  { "destinationType": "number", "targetField": "longitude" }
+                ]
+              }
+            },
+            {
+              "id": "filterByValue",
+              "options": {
+                "filters": [
+                  { "config": { "id": "gte", "options": { "value": -90 } }, "fieldName": "latitude" },
+                  { "config": { "id": "lte", "options": { "value": 90 } }, "fieldName": "latitude" },
+                  { "config": { "id": "gte", "options": { "value": -180 } }, "fieldName": "longitude" },
+                  { "config": { "id": "lte", "options": { "value": 180 } }, "fieldName": "longitude" }
+                ]
+              }
+            }
+          ],
+          "type": "geomap"
+        },
+        {
+          "datasource": { "type": "loki", "uid": "$DS_LOKI" },
+          "fieldConfig": {
+            "defaults": {
+              "custom": { "hideFrom": { "legend": false, "tooltip": false, "viz": false } },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  { "color": "green", "value": 0 },
+                  { "color": "red", "value": 80 }
+                ]
+              }
+            },
+            "overrides": []
+          },
+          "gridPos": { "h": 12, "w": 24, "x": 0, "y": 45 },
+          "id": 11,
+          "options": {
+            "basemap": { "name": "Layer 0", "noRepeat": false, "type": "default" },
+            "controls": {
+              "mouseWheelZoom": true,
+              "showAttribution": true,
+              "showDebug": false,
+              "showMeasure": false,
+              "showScale": false,
+              "showZoom": true
+            },
+            "layers": [
+              {
+                "config": {
+                  "data": { "refId": "A" },
+                  "location": { "latField": "latitude", "lonField": "longitude", "mode": "coords" },
+                  "opacity": 0.5,
+                  "showLegend": true,
+                  "size": 6,
+                  "style": { "opacity": 0.5 },
+                  "tooltip": {
+                    "fields": ["flight", "latitude", "longitude", "freq", "dst_name", "sig_db"],
+                    "mode": "details"
+                  },
+                  "color": { "mode": "fixed", "fixed": "#00FF55" }
+                },
+                "name": "HFDL positions markers",
+                "style": { "color": { "fixed": "#00FF55" }, "size": { "fixed": 6 } },
+                "type": "markers"
+              }
+            ],
+            "tooltip": { "mode": "details" },
+            "view": {
+              "allLayers": true,
+              "data": { "mode": "all-layers" },
+              "id": "fit",
+              "lat": 0,
+              "lon": 0,
+              "maxZoom": 6,
+              "noRepeat": false,
+              "padding": 0.1,
+              "zoom": 1
+            }
+          },
+          "pluginVersion": "12.2.0",
+          "targets": [
+            {
+              "direction": "backward",
+              "editorMode": "code",
+              "expr": "{job=\"dumphfdl\"}\n| json\n| line_format \"{\\\"lat\\\": {{ or .hfdl_lpdu_hfnpdu_pos_lat .pos_lat .lat }}, \\\"lon\\\": {{ or .hfdl_lpdu_hfnpdu_pos_lon .pos_lon .lon }}, \\\"flight\\\": \\\"{{ or .hfdl_lpdu_hfnpdu_flight_id .flight_id }}\\\" }\"\n",
+              "queryType": "range",
+              "refId": "A"
+            }
+          ],
+          "title": "HFDL positions",
+          "transformations": [
+            { "id": "extractFields", "options": { "format": "json", "source": "line" } },
+            { "id": "extractFields", "options": { "format": "json", "source": "Line" } },
+            {
+              "id": "convertFieldType",
+              "options": {
+                "conversions": [
+                  { "destinationType": "number", "targetField": "lat" },
+                  { "destinationType": "number", "targetField": "lon" }
+                ],
+                "fields": {}
+              }
+            },
+            {
+              "id": "organize",
+              "options": {
+                "excludeByName": { "Line": true, "id": true, "labelTypes": true, "labels": true, "line": true, "tsNs": true },
+                "renameByName": { "lat": "latitude", "lon": "longitude" }
+              }
+            }
+          ],
+          "type": "geomap"
+        }
+      ],
+      "title": "Maps (toggle open)",
+      "type": "row"
+    }
   ],
+  "preload": false,
+  "refresh": "10s",
+  "schemaVersion": 42,
+  "tags": ["hfdl", "dumphfdl", "vdl2", "dumpvdl2", "graphite", "loki"],
   "templating": {
     "list": [
       {
-        "name": "DS_GRAPHITE",
-        "type": "datasource",
+        "current": { "text": "graphite", "value": "ef0s7h4vpezgge" },
         "label": "Graphite datasource",
+        "name": "DS_GRAPHITE",
+        "options": [],
         "query": "graphite",
-        "hide": 0,
-        "refresh": 1
+        "refresh": 1,
+        "type": "datasource"
       },
       {
-        "name": "DS_LOKI",
-        "type": "datasource",
+        "current": { "text": "loki", "value": "df0s7i5kx7jlsf" },
         "label": "Loki datasource",
+        "name": "DS_LOKI",
+        "options": [],
         "query": "loki",
-        "hide": 0,
-        "refresh": 1
+        "refresh": 1,
+        "type": "datasource"
       },
       {
-        "name": "freq",
-        "type": "query",
+        "current": { "text": "All", "value": ["$__all"] },
+        "datasource": { "type": "loki", "uid": "$DS_LOKI" },
+        "includeAll": true,
         "label": "HFDL Frequency (Loki label)",
-        "datasource": {
-          "type": "loki",
-          "uid": "$DS_LOKI"
-        },
-        "query": {
-          "refId": "A",
-          "queryType": "label_values",
-          "expr": "{job=\"dumphfdl\"}",
-          "label": "freq"
-        },
+        "multi": true,
+        "name": "freq",
+        "options": [],
+        "query": { "expr": "{job=\"dumphfdl\"}", "label": "freq", "queryType": "label_values", "refId": "A" },
         "refresh": 2,
-        "hide": 0,
-        "includeAll": true,
-        "multi": true
+        "type": "query"
       },
       {
-        "name": "dst_name",
-        "type": "query",
+        "current": { "text": "All", "value": ["$__all"] },
+        "datasource": { "type": "loki", "uid": "$DS_LOKI" },
+        "includeAll": true,
         "label": "HFDL Ground Station (Loki label)",
-        "datasource": {
-          "type": "loki",
-          "uid": "$DS_LOKI"
-        },
-        "query": {
-          "refId": "A",
-          "queryType": "label_values",
-          "expr": "{job=\"dumphfdl\"}",
-          "label": "dst_name"
-        },
+        "multi": true,
+        "name": "dst_name",
+        "options": [],
+        "query": { "expr": "{job=\"dumphfdl\"}", "label": "dst_name", "queryType": "label_values", "refId": "A" },
         "refresh": 2,
-        "hide": 0,
-        "includeAll": true,
-        "multi": true
+        "type": "query"
       },
       {
-        "name": "vdl2_freq",
-        "type": "query",
+        "current": { "text": "All", "value": ["$__all"] },
+        "datasource": { "type": "loki", "uid": "$DS_LOKI" },
+        "includeAll": true,
         "label": "VDL2 Frequency (Loki label)",
-        "datasource": {
-          "type": "loki",
-          "uid": "$DS_LOKI"
-        },
-        "query": {
-          "refId": "A",
-          "queryType": "label_values",
-          "expr": "{job=\"dumpvdl2\"}",
-          "label": "freq"
-        },
+        "multi": true,
+        "name": "vdl2_freq",
+        "options": [],
+        "query": { "expr": "{job=\"dumpvdl2\"}", "label": "freq", "queryType": "label_values", "refId": "A" },
         "refresh": 2,
-        "hide": 0,
-        "includeAll": true,
-        "multi": true
+        "type": "query"
       },
       {
-        "name": "acars_flight",
-        "type": "query",
-        "label": "VDL2 ACARS Flight (Loki label)",
-        "datasource": {
-          "type": "loki",
-          "uid": "$DS_LOKI"
-        },
-        "query": {
-          "refId": "A",
-          "queryType": "label_values",
-          "expr": "{job=\"dumpvdl2\"}",
-          "label": "acars_flight"
-        },
-        "refresh": 2,
-        "hide": 0,
+        "current": { "text": "All", "value": ["$__all"] },
+        "datasource": { "type": "loki", "uid": "$DS_LOKI" },
         "includeAll": true,
-        "multi": true
+        "label": "VDL2 ACARS Flight (Loki label)",
+        "multi": true,
+        "name": "acars_flight",
+        "options": [],
+        "query": { "expr": "{job=\"dumpvdl2\"}", "label": "acars_flight", "queryType": "label_values", "refId": "A" },
+        "refresh": 2,
+        "type": "query"
       }
     ]
   },
-  "panels": [
-    {
-      "type": "stat",
-      "title": "HFDL msg/s",
-      "gridPos": {
-        "h": 4,
-        "w": 12,
-        "x": 0,
-        "y": 0
-      },
-      "datasource": {
-        "type": "graphite",
-        "uid": "$DS_GRAPHITE"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "target": "sumSeries(scale(stats_counts.dumphfdl*.channels.*.frames.good,0.1))"
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "values": false
-        },
-        "graphMode": "area",
-        "orientation": "auto",
-        "colorMode": "value"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "ops",
-          "decimals": 1
-        }
-      }
-    },
-    {
-      "type": "stat",
-      "title": "VDL2 msg/s",
-      "gridPos": {
-        "h": 4,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "datasource": {
-        "type": "graphite",
-        "uid": "$DS_GRAPHITE"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "target": "sumSeries(scale(stats_counts.dumpvdl2*.*.decoder.msg.good,0.1))"
-        }
-      ],
-      "options": {
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "values": false
-        },
-        "graphMode": "area",
-        "orientation": "auto",
-        "colorMode": "value"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "unit": "ops",
-          "decimals": 1
-        }
-      }
-    },
-    {
-      "type": "timeseries",
-      "title": "HFDL: Total frames/sec (all channels)",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 4
-      },
-      "datasource": {
-        "type": "graphite",
-        "uid": "$DS_GRAPHITE"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "target": "alias(sumSeries(scale(stats_counts.dumphfdl*.channels.*.frames.good,0.1)),'HFDL total')"
-        }
-      ],
-      "options": {
-        "legend": {
-          "displayMode": "table",
-          "placement": "bottom"
-        }
-      }
-    },
-    {
-      "type": "timeseries",
-      "title": "VDL2: Total messages/sec (all freqs)",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 4
-      },
-      "datasource": {
-        "type": "graphite",
-        "uid": "$DS_GRAPHITE"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "target": "alias(sumSeries(scale(stats_counts.dumpvdl2*.*.decoder.msg.good,0.1)),'VDL2 total')"
-        }
-      ],
-      "options": {
-        "legend": {
-          "displayMode": "table",
-          "placement": "bottom"
-        }
-      }
-    },
-    {
-      "type": "timeseries",
-      "title": "HFDL: Top 5 channels (15m avg)",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 12
-      },
-      "datasource": {
-        "type": "graphite",
-        "uid": "$DS_GRAPHITE"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "target": "highestAverage(movingAverage(scale(stats_counts.dumphfdl*.channels.*.frames.good,0.1),'15min'),5)"
-        }
-      ]
-    },
-    {
-      "type": "timeseries",
-      "title": "VDL2: Top 5 freqs (15m avg)",
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 12
-      },
-      "datasource": {
-        "type": "graphite",
-        "uid": "$DS_GRAPHITE"
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "target": "highestAverage(movingAverage(scale(stats_counts.dumpvdl2*.*.decoder.msg.good,0.1),'15min'),5)"
-        }
-      ]
-    },
-    {
-      "type": "logs",
-      "title": "HFDL logs (filter by freq & ground station)",
-      "gridPos": {
-        "h": 12,
-        "w": 12,
-        "x": 0,
-        "y": 20
-      },
-      "datasource": {
-        "type": "loki",
-        "uid": "$DS_LOKI"
-      },
-      "options": {
-        "dedupStrategy": "none",
-        "wrapLogMessage": true
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "{job=\"dumphfdl\",freq=~\"${freq:regex}\",dst_name=~\"${dst_name:regex}\"}"
-        }
-      ]
-    },
-    {
-      "type": "logs",
-      "title": "VDL2 logs (filter by freq; ACARS flight optional)",
-      "gridPos": {
-        "h": 12,
-        "w": 12,
-        "x": 12,
-        "y": 20
-      },
-      "datasource": {
-        "type": "loki",
-        "uid": "$DS_LOKI"
-      },
-      "options": {
-        "dedupStrategy": "none",
-        "wrapLogMessage": true
-      },
-      "targets": [
-        {
-          "refId": "A",
-          "expr": "{job=\"dumpvdl2\",freq=~\"${vdl2_freq:regex}\"}"
-        }
-      ]
-    },
-    {
-      "type": "row",
-      "title": "Maps (toggle open)",
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 32
-      },
-      "collapsed": true,
-      "panels": [
-        {
-          "type": "geomap",
-          "title": "VDL2 positions (ACARS when present)",
-          "gridPos": {
-            "h": 12,
-            "w": 24,
-            "x": 0,
-            "y": 33
-          },
-          "datasource": {
-            "type": "loki",
-            "uid": "$DS_LOKI"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "expr": "{job=\"dumpvdl2\", has_pos=\"1\", freq=~\"${vdl2_freq:regex}\"} | json | __error__=\"\" | label_format lat=\"{{ .pos_lat }}\", lon=\"{{ .pos_lon }}\", flight=\"{{ or .acars_flight .vdl2_acars_flight }}\", reg=\"{{ or .acars_reg .vdl2_acars_reg }}\""
-            }
-          ],
-          "options": {
-            "basemap": {
-              "type": "default"
-            },
-            "view": {
-              "id": "map",
-              "zoom": 2
-            },
-            "layers": [
-              {
-                "type": "markers",
-                "name": "VDL2 points",
-                "config": {
-                  "showLegend": true,
-                  "size": 6,
-                  "opacity": 0.9,
-                  "metric": {
-                    "latField": "lat",
-                    "lonField": "lon"
-                  },
-                  "tooltip": {
-                    "mode": "details",
-                    "fields": [
-                      "flight",
-                      "reg",
-                      "freq",
-                      "sig_db",
-                      "acars_label",
-                      "avlc_frame_type"
-                    ]
-                  }
-                }
-              }
-            ]
-          }
-        },
-        {
-          "type": "geomap",
-          "title": "HFDL positions",
-          "gridPos": {
-            "h": 12,
-            "w": 24,
-            "x": 0,
-            "y": 45
-          },
-          "datasource": {
-            "type": "loki",
-            "uid": "$DS_LOKI"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "expr": "{job=\"dumphfdl\", has_pos=\"1\", freq=~\"${freq:regex}\", dst_name=~\"${dst_name:regex}\"} | json | __error__=\"\" | label_format lat=\"{{ or .hfdl_lpdu_hfnpdu_pos_lat .pos_lat }}\", lon=\"{{ or .hfdl_lpdu_hfnpdu_pos_lon .pos_lon }}\", flight=\"{{ or .hfdl_lpdu_hfnpdu_flight_id .flight_id }}\""
-            }
-          ],
-          "options": {
-            "basemap": {
-              "type": "default"
-            },
-            "view": {
-              "id": "map",
-              "zoom": 2
-            },
-            "layers": [
-              {
-                "type": "markers",
-                "name": "HFDL points",
-                "config": {
-                  "showLegend": true,
-                  "size": 6,
-                  "opacity": 0.9,
-                  "metric": {
-                    "latField": "lat",
-                    "lonField": "lon"
-                  },
-                  "tooltip": {
-                    "mode": "details",
-                    "fields": [
-                      "flight",
-                      "freq",
-                      "sig_db",
-                      "dst_name"
-                    ]
-                  }
-                }
-              }
-            ]
-          }
-        }
-      ]
-    },
-    {
-      "type": "row",
-      "title": "ACARS reassembly (collapsed)",
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 33
-      },
-      "collapsed": true,
-      "panels": [
-        {
-          "type": "timeseries",
-          "title": "ACARS reassembly completes (A2G vs G2A) \u2014 HFDL & VDL2",
-          "gridPos": {
-            "h": 8,
-            "w": 24,
-            "x": 0,
-            "y": 34
-          },
-          "datasource": {
-            "type": "graphite",
-            "uid": "$DS_GRAPHITE"
-          },
-          "targets": [
-            {
-              "refId": "A",
-              "target": "alias(scale(stats_counts.dumphfdl*.acars.reasm.complete.air2gnd,0.1),'HFDL A2G')"
-            },
-            {
-              "refId": "B",
-              "target": "alias(scale(stats_counts.dumphfdl*.acars.reasm.complete.gnd2air,0.1),'HFDL G2A')"
-            },
-            {
-              "refId": "C",
-              "target": "alias(scale(stats_counts.dumpvdl2*.acars.reasm.complete.air2gnd,0.1),'VDL2 A2G')"
-            },
-            {
-              "refId": "D",
-              "target": "alias(scale(stats_counts.dumpvdl2*.acars.reasm.complete.gnd2air,0.1),'VDL2 G2A')"
-            }
-          ],
-          "options": {
-            "legend": {
-              "displayMode": "table",
-              "placement": "bottom"
-            },
-            "tooltip": {
-              "mode": "multi"
-            },
-            "stacking": "normal"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "unit": "ops"
-            }
-          }
-        }
-      ]
-    }
-  ],
-  "uid": null,
-  "time": {
-    "from": "now-6h",
-    "to": "now"
-  },
-  "timepicker": {
-    "refresh_intervals": [
-      "5s",
-      "10s",
-      "30s",
-      "1m",
-      "5m"
-    ]
-  }
+  "time": { "from": "now-6h", "to": "now" },
+  "timepicker": { "refresh_intervals": ["5s", "10s", "30s", "1m", "5m"] },
+  "timezone": "",
+  "title": "HFDL + VDL2: Metrics + Logs + Map",
+  "version": 3
 }
