@@ -84,7 +84,7 @@ docker compose up -d
 Then run dumphfdl and point its outputs to the stack:
 
 ``` bash
-dumphfdl --soapysdr driver=airspyhf --sample-rate 768000   --centerfreq 8891 8834 8885 8894 8912 8927 8939 8942 8948   --statsd 127.0.0.1:8125   --system-table /usr/src/dumphfdl/etc/systable.conf   --output decoded:json:file:path=/tmp/hfdl.jsonl,rotate=hourly
+dumphfdl --soapysdr driver=airspyhf --sample-rate 768000 --centerfreq 8891 8834 8885 8894 8912 8927 8939 8942 8948 --statsd 127.0.0.1:8125 --system-table /usr/src/dumphfdl/etc/systable.conf --output decoded:json:file:path=/tmp/hfdl.jsonl,rotate=daily
 ```
 
 Once running:
