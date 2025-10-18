@@ -367,7 +367,19 @@
       "transformations": [
         { "id": "extractFields", "options": { "format": "json", "source": "line" } },
         { "id": "extractFields", "options": { "format": "json", "source": "Line" } },
-        { "id": "convertFieldType", "options": { "conversions": [ { "destinationType": "number", "targetField": "latitude" }, { "destinationType": "number", "targetField": "longitude" } ] } }
+        { "id": "convertFieldType", "options": { "conversions": [ { "destinationType": "number", "targetField": "latitude" }, { "destinationType": "number", "targetField": "longitude" } ] } },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "labels": true,
+              "Line": true,
+              "tsNs": true,
+              "labelTypes": true,
+              "id": true
+            }
+          }
+        }
       ],
       "type": "geomap"
     },
