@@ -106,7 +106,7 @@ Once running:
         -   Type: *Loki*\
         -   URL: `http://loki:3100`
 -   After adding both data sources, import the example dashboard
-    (`dashboard-hfdl.json`) to visualize live HFDL metrics and logs
+    (`dashboard.json`) to visualize live HFDL and VDL2 metrics and logs 
 
 ------------------------------------------------------------------------
 
@@ -115,7 +115,7 @@ Once running:
     dumphfdl-grafana-stack/
     ├── docker-compose.yml          # Graphite, Grafana, Loki, Promtail setup
     ├── promtail-config.yaml        # JSON parsing + labeling stages
-    ├── dashboard-hfdl.json         # Example Grafana dashboard
+    ├── dashboard.json         # Example Grafana dashboard
     └── README.md                   # This file
 
 ------------------------------------------------------------------------
