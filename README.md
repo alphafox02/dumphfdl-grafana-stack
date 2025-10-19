@@ -1,7 +1,7 @@
 # dumphfdl-grafana-stack
 
-A self-contained observability stack for dumphfdl --- visualize decoded
-HFDL aircraft data in Grafana using Graphite, Loki, and Promtail via
+Despite the name, this project is a self-contained observability stack for dumphfdl and dumpvdl2 --- visualize decoded
+HFDL and VDL2 aircraft data in Grafana using Graphite, Loki, and Promtail via
 Docker.
 
 ------------------------------------------------------------------------
@@ -14,8 +14,8 @@ monitoring pipeline:
      ┌──────────┐        StatsD        ┌──────────────┐
      │ dumphfdl │ ───────────────────▶ │  Graphite    │
      │ (HF data)│                      └──────────────┘
-     │          │        JSON logs     ┌──────────────┐
-     │          │ ───────────────────▶ │  Promtail    │
+     │ dumpvdl2 │        JSON logs     ┌──────────────┐
+     │ (VHF data│ ───────────────────▶ │  Promtail    │
      └──────────┘                      └──────────────┘
                                            ▼     ▼
                                        ┌──────────────┐
@@ -29,7 +29,9 @@ monitoring pipeline:
 
 -   Ubuntu or Debian-based system
 -   dumphfdl built with SoapySDR (e.g., AirspyHF, RTL-SDR, etc.)
+-   dumpvdl2 
 -   Access to an HF receiver and antenna
+-   Access to an VHF receiver and antenna
 -   Docker and Docker Compose installed
 
 ------------------------------------------------------------------------
@@ -84,7 +86,13 @@ docker compose up -d
 Then run dumphfdl and point its outputs to the stack:
 
 ``` bash
-dumphfdl --soapysdr driver=airspyhf --sample-rate 768000 --centerfreq 8891 8834 8885 8894 8912 8927 8939 8942 8948 --statsd 127.0.0.1:8125 --system-table /usr/src/dumphfdl/etc/systable.conf --output decoded:json:file:path=/tmp/hfdl.jsonl,rotate=daily
+dumphfdl --soapysdr driver=airspyhf--sample-rate 768000 --centerfreq 8891 8834 8885 8894 8912 8927 8939 8942 8948 --statsd 127.0.0.1:8125 --system-table /usr/src/dumphfdl/etc/systable.conf --output decoded:json:file:path=/tmp/hfdl.jsonl,rotate=daily
+```
+
+Then run dumpvdl2 and point its outputs to the stack:
+
+``` bash
+dumpvdl2 --rtlsdr 0 136725000 136975000 136875000 --statsd 127.0.0.1:8125 --output decoded:json:file:path=/tmp/vdl2.jsonl,rotate=daily
 ```
 
 Once running:
@@ -115,20 +123,20 @@ Once running:
 ## Troubleshooting
 
 **No metrics in Grafana:**\
-- Check dumphfdl is running with `--statsd 127.0.0.1:8125`\
+- Check dumphfdl and dumpvdl2 is running with `--statsd 127.0.0.1:8125`\
 - Run `docker logs graphite` to verify StatsD metrics
 
 **No logs in Grafana (Loki):**\
-- Ensure Promtail is tailing `/tmp/hfdl_*.jsonl` (check
+- Ensure Promtail is tailing `/tmp/hfdl_*.jsonl` and `/tmp/vdl2_*.jsonl` (check
 `docker logs promtail`)\
 - Confirm that file exists and has readable JSON lines
 
-**Permission issues:**\
-- `/tmp/hfdl_*.jsonl` must be world-readable, or mounted into `/logs`
+**Permission issues:**
+- `/tmp/hfdl_*.jsonl` and `/tmp/vdl2_*.jsonl` must be world-readable, or mounted into `/logs`
 inside the Promtail container
 
 **Disk usage:**\
-- Rotate logs hourly or daily (already configured in dumphfdl). Loki
+- Rotate logs hourly or daily (already configured in dumphfdl and dumpvdl2). Loki
 stores compressed data; older chunks can be purged if needed.
 
 ------------------------------------------------------------------------
@@ -138,8 +146,6 @@ stores compressed data; older chunks can be purged if needed.
 Ideas for expansion:
 
 -   Add InfluxDB instead of Graphite
--   Integrate a map panel showing decoded aircraft positions
--   Combine with VDL2 or ACARS decoders
 -   Build automatic dashboards per receiver station
 
 ------------------------------------------------------------------------
@@ -147,7 +153,7 @@ Ideas for expansion:
 ## Credits
 
 Created by **cemaxecuter**\
-Tested on DragonOS with AirspyHF receiver
+Tested on DragonOS with AirspyHF and RTLSDR receiver
 
 ------------------------------------------------------------------------
 
