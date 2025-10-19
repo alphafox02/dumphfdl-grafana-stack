@@ -9,15 +9,17 @@ clients:
   - url: http://loki:3100/loki/api/v1/push
 
 scrape_configs:
+  # =========================
+  # HFDL (dumphfdl JSONL)
+  # =========================
   - job_name: dumphfdl
     static_configs:
       - targets: [localhost]
         labels:
           job: dumphfdl
-          __path__: /logs/hfdl_*.jsonl   # mapped from /tmp/hfdl.jsonl in docker-compose
+          __path__: /logs/hfdl_*.jsonl
 
     pipeline_stages:
-      # 1) parse your JSON (everything under "hfdl")
       - json:
           expressions:
             app: hfdl.app.name
@@ -42,12 +44,12 @@ scrape_configs:
             dst_name: hfdl.lpdu.dst.name
             icao: hfdl.lpdu.ac_info.icao
 
-            # HFNPDU / ACARS bits (present in many messages)
+            # HFNPDU / ACARS bits
             hfnpdu_type_id: hfdl.lpdu.hfnpdu.type.id
             hfnpdu_type: hfdl.lpdu.hfnpdu.type.name
             flight_id: hfdl.lpdu.hfnpdu.flight_id
 
-            # position if present
+            # Position (when present)
             pos_lat: hfdl.lpdu.hfnpdu.pos.lat
             pos_lon: hfdl.lpdu.hfnpdu.pos.lon
 
@@ -57,13 +59,33 @@ scrape_configs:
             acars_reg: hfdl.lpdu.hfnpdu.acars.reg
             acars_msg: hfdl.lpdu.hfnpdu.acars.msg_text
 
-      # 2) normalize dst_name for use as a label (spaces/commas -> underscores)
+      # has_pos helper
+      - template:
+          source: "message"
+          template: '{{ if and .pos_lat .pos_lon }}1{{ else }}0{{ end }}'
+          dest: has_pos
+
+      # Trim flight_id -> flight
+      - template:
+          source: "message"
+          template: '{{ trim .flight_id }}'
+          dest: flight
+
+      # Normalize label-safe strings
       - replace:
           source: dst_name
           expression: '[^A-Za-z0-9_.-]'
           replace: '_'
+      - replace:
+          source: acars_flight
+          expression: '[^A-Za-z0-9_.-]'
+          replace: '_'
+      - replace:
+          source: acars_reg
+          expression: '[^A-Za-z0-9_.-]'
+          replace: '_'
 
-      # 3) promote selected fields to Loki labels (fast filters in Explore)
+      # Promote labels (simple syntax: keys = field names to turn into labels)
       - labels:
           station:
           freq:
@@ -71,13 +93,158 @@ scrape_configs:
           slot:
           lpdu_type:
           dst_type:
-          dst_name:     # e.g., Albrook,_Panama
+          dst_name:
           icao:
           flight_id:
+          flight:
           acars_label:
           acars_flight:
+          hfnpdu_type:
+          has_pos:
+          sig_db:
 
-      # 4) use device time (seconds) rather than ingestion time
+      - timestamp:
+          source: tsecs
+          format: Unix
+
+
+  # =========================
+  # VDL2 (dumpvdl2 JSONL)
+  # =========================
+  - job_name: dumpvdl2
+    static_configs:
+      - targets: [localhost]
+        labels:
+          job: dumpvdl2
+          __path__: /logs/vdl2_*.jsonl
+
+    pipeline_stages:
+      - json:
+          expressions:
+            app: vdl2.app.name
+            ver: vdl2.app.ver
+            station: vdl2.station
+            tsecs: vdl2.t.sec
+            tusec: vdl2.t.usec
+            freq: vdl2.freq
+            burst_len: vdl2.burst_len_octets
+            hdr_bits_fixed: vdl2.hdr_bits_fixed
+            fec_octets: vdl2.octets_corrected_by_fec
+            idx: vdl2.idx
+            sig_db: vdl2.sig_level
+            noise_db: vdl2.noise_level
+            skew_ppm: vdl2.freq_skew
+
+            # AVLC envelope
+            avlc_cr: vdl2.avlc.cr
+            avlc_frame_type: vdl2.avlc.frame_type
+            avlc_cmd: vdl2.avlc.cmd
+            avlc_src_addr: vdl2.avlc.src.addr
+            avlc_src_type: vdl2.avlc.src.type
+            avlc_dst_addr: vdl2.avlc.dst.addr
+            avlc_dst_type: vdl2.avlc.dst.type
+
+            # ACARS under AVLC
+            acars_label: vdl2.avlc.acars.label
+            acars_block_id: vdl2.avlc.acars.blk_id
+            acars_mode: vdl2.avlc.acars.mode
+            acars_reg: vdl2.avlc.acars.reg
+            acars_flight: vdl2.avlc.acars.flight
+            acars_txt: vdl2.avlc.acars.msg_text
+
+            # Fallbacks (top-level acars)
+            acars_label2: vdl2.acars.label
+            acars_block_id2: vdl2.acars.block_id
+            acars_mode2: vdl2.acars.mode
+            acars_reg2: vdl2.acars.reg
+            acars_flight2: vdl2.acars.flight
+            acars_txt2: vdl2.acars.msg_text
+
+            # Position possibilities
+            pos_lat_acars: vdl2.avlc.acars.pos.lat
+            pos_lon_acars: vdl2.avlc.acars.pos.lon
+            pos_lat_raw: vdl2.pos.lat
+            pos_lon_raw: vdl2.pos.lon
+
+      # Coalesce ACARS/top-level into unified acars_* fields
+      - template:
+          source: "message"
+          template: '{{ if .acars_label }}{{ .acars_label }}{{ else }}{{ .acars_label2 }}{{ end }}'
+          dest: acars_label_u
+      - template:
+          source: "message"
+          template: '{{ if .acars_block_id }}{{ .acars_block_id }}{{ else }}{{ .acars_block_id2 }}{{ end }}'
+          dest: acars_block_id_u
+      - template:
+          source: "message"
+          template: '{{ if .acars_mode }}{{ .acars_mode }}{{ else }}{{ .acars_mode2 }}{{ end }}'
+          dest: acars_mode_u
+      - template:
+          source: "message"
+          template: '{{ if .acars_reg }}{{ .acars_reg }}{{ else }}{{ .acars_reg2 }}{{ end }}'
+          dest: acars_reg_u
+      - template:
+          source: "message"
+          template: '{{ if .acars_flight }}{{ .acars_flight }}{{ else }}{{ .acars_flight2 }}{{ end }}'
+          dest: acars_flight_u
+      - template:
+          source: "message"
+          template: '{{ if .acars_txt }}{{ .acars_txt }}{{ else }}{{ .acars_txt2 }}{{ end }}'
+          dest: acars_txt_u
+
+      # Unified position fields for the map (structured JSON first)
+      - template:
+          source: "message"
+          template: '{{ if .pos_lat_acars }}{{ .pos_lat_acars }}{{ else }}{{ .pos_lat_raw }}{{ end }}'
+          dest: pos_lat
+      - template:
+          source: "message"
+          template: '{{ if .pos_lon_acars }}{{ .pos_lon_acars }}{{ else }}{{ .pos_lon_raw }}{{ end }}'
+          dest: pos_lon
+
+      # Extract lat/lon from ACARS msg_text like "/+34.271/-83.172/..."
+      - regex:
+          source: acars_txt_u
+          expression: '(?P<pos_lat>[+-]?\d{1,3}(?:\.\d{3,6})?)\/(?P<pos_lon>[+-]?\d{1,3}(?:\.\d{3,6})?)'
+
+      # Recompute has_pos after regex
+      - template:
+          source: "message"
+          template: '{{ if and .pos_lat .pos_lon }}1{{ else }}0{{ end }}'
+          dest: has_pos
+
+      # Map *_u into final acars_* fields so labels work
+      - template:
+          source: acars_label
+          template: '{{ .acars_label_u }}'
+      - template:
+          source: acars_flight
+          template: '{{ .acars_flight_u }}'
+      - template:
+          source: acars_reg
+          template: '{{ .acars_reg_u }}'
+
+      # Normalize label-safe strings
+      - replace:
+          source: acars_flight
+          expression: '[^A-Za-z0-9_.-]'
+          replace: '_'
+      - replace:
+          source: acars_reg
+          expression: '[^A-Za-z0-9_.-]'
+          replace: '_'
+
+      # Promote labels (simple syntax)
+      - labels:
+          station:
+          freq:
+          avlc_frame_type:
+          acars_label:
+          acars_flight:
+          acars_reg:
+          has_pos:
+          sig_db:
+
       - timestamp:
           source: tsecs
           format: Unix
