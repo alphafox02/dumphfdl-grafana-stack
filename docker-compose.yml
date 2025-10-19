@@ -1,13 +1,21 @@
 version: "3.9"
 
+volumes:
+  grafana-data: {}
+  graphite-data: {}
+  loki-data: {}
+  promtail-positions: {}
+
 services:
   graphite:
     image: graphiteapp/graphite-statsd:1.1.10-5
     container_name: graphite
     ports:
       - "8080:80"         # Graphite Web UI/API
-      - "2003:2003"       # Carbon plaintext input (TCP) - optional
-      - "8125:8125/udp"   # StatsD input (UDP) for dumphfdl metrics
+      - "2003:2003"       # Carbon plaintext input (TCP)
+      - "8125:8125/udp"   # StatsD input (UDP)
+    volumes:
+      - graphite-data:/opt/graphite/storage
     restart: unless-stopped
 
   grafana:
@@ -22,6 +30,8 @@ services:
       - GF_SECURITY_ADMIN_PASSWORD=admin
       - GF_DATABASE_WAL=true
       - GF_DATABASE_SQLITE_BUSY_TIMEOUT=10000
+    volumes:
+      - grafana-data:/var/lib/grafana
     restart: unless-stopped
 
   loki:
@@ -29,7 +39,9 @@ services:
     container_name: loki
     command: -config.file=/etc/loki/local-config.yaml
     ports:
-      - "3100:3100"       # Loki HTTP API
+      - "3100:3100"
+    volumes:
+      - loki-data:/loki
     restart: unless-stopped
 
   promtail:
@@ -41,4 +53,5 @@ services:
     volumes:
       - /tmp:/logs:ro
       - ./promtail-config.yaml:/etc/promtail/config.yaml:ro
+      - promtail-positions:/promtail
     restart: unless-stopped
